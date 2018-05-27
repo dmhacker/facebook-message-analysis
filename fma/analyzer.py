@@ -1,11 +1,17 @@
 from matplotlib.ticker import MaxNLocator
 from collections import namedtuple, defaultdict
+from operator import itemgetter
+from nltk.corpus import stopwords
 
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
+import heapq
+import string
 
 import parser
+
+english_stopwords = set(stopwords.words('english'))
 
 def analyze(filename):
     '''
@@ -13,13 +19,17 @@ def analyze(filename):
     '''
 
     # Load messages
+    print('Reading file {0} ...'.format(filename))
     messages = parser.get_messages(filename)
+    print('Loaded {0} messages ...'.format(len(messages)))
+    print('Aggregating data ...')
 
     # Data structures to hold information about the messages 
     monthly_counts = defaultdict(int)
     monthly_sticker_counts = defaultdict(int)
     day_counts = defaultdict(int)
     hourly_counts = defaultdict(int)
+    word_frequencies = defaultdict(int)
     first_date = None 
     last_date = None 
 
@@ -38,6 +48,21 @@ def analyze(filename):
         day_counts[day] += 1 
         hourly_counts[time.hour] += 1 
 
+        # Determine word frequencies
+        if 'content' in message:
+            # Split message up by spaces to get individual words
+            for word in message['content'].split(' '):
+                # Make the word lowercase and strip it of punctuation
+                new_word = word.lower().strip(string.punctuation)
+
+                # Word might have been entirely punctuation; don't strip it
+                if not new_word:
+                    new_word = word.lower()
+                
+                # Ignore word if it in the stopword set or if it is less than 2 characters
+                if len(new_word) > 1 and new_word not in english_stopwords:
+                    word_frequencies[new_word] += 1 
+
         # Determine start and last dates of messages 
         if (first_date and first_date > date) or not first_date:
             first_date = date 
@@ -46,6 +71,11 @@ def analyze(filename):
 
     # Get the number of days the messages span over
     num_days = (last_date - first_date).days
+
+    # Get most common words
+    most_used_words = heapq.nlargest(100, word_frequencies.items(), key=itemgetter(1)) 
+
+    print('Preparing data for display ...')
 
     # Format data for graphing
     xdata_monthly = sorted(list(monthly_counts.keys()))
@@ -59,6 +89,8 @@ def analyze(filename):
     '''
     DATA VISUALIZATION 
     '''
+
+    print('Displaying ...')
 
     # Generate subplots
     fig, ax_array = plt.subplots(3, 1)
@@ -128,5 +160,6 @@ def analyze(filename):
     fig.tight_layout()
     plt.show()
 
+    print('Done.')
 
 
