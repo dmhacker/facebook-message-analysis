@@ -12,8 +12,7 @@ python fbmsganalysis FILE
 ```
   <sup><sub>* Replace FILE with the path to the JSON file you identified earlier.</sub><sup>
 
-In a few seconds, you should have some nice & pretty graphs that might reveal some interesting insights into your messages
-with whomever you choose earlier.
+In a few seconds, you should have some nice & pretty graphs that might reveal some interesting insights and/or trends.
 
 ## Troubleshooting
 
