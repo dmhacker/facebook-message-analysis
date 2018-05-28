@@ -24,7 +24,7 @@ def analyze(filename):
     # Load messages
     print('Reading file {0} ...'.format(filename))
     timestamp = time.clock()
-    messages = parser.get_messages(filename)
+    messages = parser.get_messages(filename, copy_from_cache=False)
     print('Loaded {0} messages in {1:.2f} seconds.'.format(len(messages), time.clock() - timestamp))
 
     print('Aggregating data ...')
@@ -230,6 +230,7 @@ def analyze(filename):
         ax.set_xticklabels(tick_labels)
         for tick in ax.get_xticklabels():
             tick.set_rotation(30)
+        ax.set_ylim([-1.0, 1.0])
 
         ax.legend()
 
