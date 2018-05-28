@@ -1,4 +1,5 @@
-pytz
-nltk
-matplotlib
 unidecode
+pytz
+matplotlib
+nltk
+vaderSentiment
