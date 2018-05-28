@@ -10,11 +10,32 @@ import datetime
 import heapq
 import string
 import time
-
-import parser
+import json
+import copy
 
 english_stopwords = set(stopwords.words('english'))
 sentiment_analyzer = SentimentIntensityAnalyzer()
+cache = {}
+
+def _load_messages(filename):
+    if filename in cache:
+        return cache[filename]
+    else:
+        with open(filename) as jsonfile:
+            data = json.load(jsonfile)
+            cache[filename] = data
+            return data
+        
+def get_messages(filename, copy_from_cache=True):
+    data = _load_messages(filename)
+
+    # Copy the stored messages we have
+    copied_messages = data['messages']
+    if copy_from_cache:
+        copied_messages = copy.deepcopy(data['messages'])
+
+    # Return a sorted list of messages by time
+    return sorted(copied_messages, key=lambda message : message['timestamp'])
 
 def analyze(filename):
     '''
@@ -24,7 +45,7 @@ def analyze(filename):
     # Load messages
     print('Reading file {0} ...'.format(filename))
     timestamp = time.clock()
-    messages = parser.get_messages(filename, copy_from_cache=False)
+    messages = get_messages(filename, copy_from_cache=False)
     print('Loaded {0} messages in {1:.2f} seconds.'.format(len(messages), time.clock() - timestamp))
 
     print('Aggregating data ...')
