@@ -1,0 +1,4 @@
+pytz
+nltk
+matplotlib
+unidecode

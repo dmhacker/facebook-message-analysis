@@ -2,6 +2,7 @@ from matplotlib.ticker import MaxNLocator
 from collections import namedtuple, defaultdict
 from operator import itemgetter
 from nltk.corpus import stopwords
+from unidecode import unidecode
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -51,7 +52,7 @@ def analyze(filename):
         # Determine word frequencies
         if 'content' in message:
             # Split message up by spaces to get individual words
-            for word in message['content'].split(' '):
+            for word in unidecode(message['content']).split(' '):
                 # Make the word lowercase and strip it of punctuation
                 new_word = word.lower().strip(string.punctuation)
 
@@ -74,6 +75,7 @@ def analyze(filename):
 
     # Get most common words
     most_used_words = heapq.nlargest(100, word_frequencies.items(), key=itemgetter(1)) 
+    print(most_used_words)
 
     print('Preparing data for display ...')
 
