@@ -16,14 +16,14 @@ In a few seconds, you should have some nice & pretty graphs that might reveal so
 
 ## Troubleshooting
 
-If you get an import error, it means that the dependencies that `facebook-message-analysis` needs are not installed.
-Use this command inside the project directory to install them:
+If you get an import error, it means that the dependencies that `facebook-message-analysis` needs are not installed.<br>
+Use this command inside the project directory to resolve this:
 
 ```
 pip install -r requirements.txt
 ```
 
-If you get an NLTK download error, it means that NLTK hasn't downloaded the stopwords file that `facebook-message-analysis` uses.
+If you get an NLTK download error, it means that NLTK hasn't cached the stopwords file that `facebook-message-analysis` uses.<br>
 Use this command inside the project directory to resolve this:
 
 ```
