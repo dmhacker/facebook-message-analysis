@@ -10,7 +10,7 @@
 git clone https://github.com/dmhacker/facebook-message-analysis && cd facebook-message-analysis
 python fbmsganalysis FILE
 ```
-<sup><sub>Replace FILE with the JSON file you identified earlier.</sub><sup>
+<sup><sub>* Replace FILE with the JSON file you identified earlier.</sub><sup>
 
 In a few seconds, you should have some nice & pretty graphs that might reveal some interesting insights into your messages
 with whomever you choose earlier.
