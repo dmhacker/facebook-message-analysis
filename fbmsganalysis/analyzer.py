@@ -142,9 +142,9 @@ def analyze(filename):
         ax.set_ylabel('Count')
         ax.set_title('Number of messages exchanged every day')
 
-        num_ticks = 16 if len(indices) > 15 else len(indices)
+        num_ticks = 16 if len(indices) >= 16 else len(indices)
         tick_spacing = round(len(indices) / num_ticks)
-        ticks = [tick_spacing * i for i in range(num_ticks)]
+        ticks = [tick_spacing * i for i in range(num_ticks) if tick_spacing * i < len(xdata)]
         tick_labels = [xdata[tick] for tick in ticks]
 
         ax.set_xticks(ticks)
@@ -221,9 +221,9 @@ def analyze(filename):
         ax.set_ylabel('Sentiment')
         ax.set_title('Average sentiment over time')
 
-        num_ticks = 16 if len(indices) > 15 else len(indices)
+        num_ticks = 16 if len(indices) >= 16 else len(indices)
         tick_spacing = round(len(indices) / num_ticks)
-        ticks = [tick_spacing * i for i in range(num_ticks)]
+        ticks = [tick_spacing * i for i in range(num_ticks) if tick_spacing * i < len(xdata)]
         tick_labels = [xdata[tick] for tick in ticks]
 
         ax.set_xticks(ticks)
