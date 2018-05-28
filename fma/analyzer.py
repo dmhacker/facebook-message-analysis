@@ -31,12 +31,13 @@ def analyze(filename):
     timestamp = time.clock()
 
     # Data structures to hold information about the messages 
+    daily_counts = defaultdict(int)
+    daily_sticker_counts = defaultdict(int)
+    daily_sentiments = defaultdict(float)
     monthly_counts = defaultdict(int)
     monthly_sticker_counts = defaultdict(int)
-    day_counts = defaultdict(int)
     hourly_counts = defaultdict(int)
-    daily_counts = defaultdict(int)
-    daily_sentiments = defaultdict(float)
+    day_name_counts = defaultdict(int)
     word_frequencies = defaultdict(int)
     first_date = None 
     last_date = None 
@@ -46,8 +47,8 @@ def analyze(filename):
         # Convert message's Unix timestamp to local datetime
         date = datetime.datetime.fromtimestamp(message['timestamp'])
         month = date.strftime('%Y-%m')
-        full_day = date.strftime('%Y-%m-%d')
-        day = date.strftime('%A')
+        day = date.strftime('%Y-%m-%d')
+        day_name = date.strftime('%A')
         hour = date.time().hour
 
         # Get content in message if it has any
@@ -55,16 +56,17 @@ def analyze(filename):
             content = unidecode(message['content'])
 
         # Increment message counts
+        hourly_counts[hour] += 1 
+        day_name_counts[day_name] += 1 
+        daily_counts[day] += 1
         monthly_counts[month] += 1
         if 'sticker' in message:
+            daily_sticker_counts[day] += 1
             monthly_sticker_counts[month] += 1
-        daily_counts[full_day] += 1
-        day_counts[day] += 1 
-        hourly_counts[hour] += 1 
 
         # Rudimentary sentiment analysis using VADER
         sentiments = sentiment_analyzer.polarity_scores(content)
-        daily_sentiments[full_day] += sentiments['pos'] - sentiments['neg']
+        daily_sentiments[day] += sentiments['pos'] - sentiments['neg']
 
         # Determine word frequencies
         if content: 
@@ -88,8 +90,8 @@ def analyze(filename):
             last_date = date 
 
     # Take the average of the sentiment amassed for each day
-    for full_day, message_count in daily_counts.items():
-        daily_sentiments[full_day] /= message_count
+    for day, message_count in daily_counts.items():
+        daily_sentiments[day] /= message_count
 
     # Get the number of days the messages span over
     num_days = (last_date - first_date).days
@@ -102,11 +104,14 @@ def analyze(filename):
     print('Preparing data for display ...')
 
     # Format data for graphing
+    xdata_daily = sorted(list(daily_counts.keys()))
+    ydata_daily = [daily_counts[x] for x in xdata_daily]
+    ydata_daily_stickers = [daily_sticker_counts[x] for x in xdata_daily]
     xdata_monthly = sorted(list(monthly_counts.keys()))
     ydata_monthly = [monthly_counts[x] for x in xdata_monthly]
     ydata_monthly_stickers = [monthly_sticker_counts[x] for x in xdata_monthly]
-    xdata_day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    ydata_day = [float(day_counts[x]) / num_days for x in xdata_day]
+    xdata_day_name = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    ydata_day_name = [float(day_name_counts[x]) / num_days * 7 for x in xdata_day_name]
     xdata_hourly = ['{0}:00'.format(i) for i in range(24)]
     ydata_hourly = [float(hourly_counts[x]) / num_days for x in range(24)]
     xdata_sentiment = sorted(list(daily_sentiments.keys()))
@@ -119,81 +124,105 @@ def analyze(filename):
     print('Displaying ...')
 
     # Generate subplots
-    fig, ax_array = plt.subplots(3, 2)
-   
-    # Graph shows monthly totals of messages
-    def show_monthly_count_graph(ax, xdata, ydata, ydata_stickers):
+    fig, ax_array = plt.subplots(2, 3)
+
+    def show_daily_total_graph(ax, xdata, ydata, ydata_stickers):
         indices = np.arange(len(xdata))
-        bar_width = 0.45
-        
-        ax.bar(indices, ydata, bar_width, 
-                alpha=0.5, color='b',
-                align='center',
+
+        ax.plot(indices, ydata, 
+                alpha=1.0, color='dodgerblue', 
                 label='All messages')
 
-        ax.bar(indices + bar_width, ydata_stickers, bar_width, 
-                alpha=0.5, color='r',
-                align='center',
+        ax.plot(indices, ydata_stickers, 
+                alpha=1.0, color='orange', 
                 label='Facebook stickers')
 
         ax.set_xlabel('Date')
         ax.set_ylabel('Count')
-        ax.set_title('Monthly Totals')
-        ax.set_xticks(indices + bar_width / 2)
+        ax.set_title('Number of messages exchanged every day')
+
+        num_ticks = 16
+        tick_spacing = round(len(indices) / num_ticks)
+        ticks = [tick_spacing * i for i in range(num_ticks)]
+        tick_labels = [xdata[tick] for tick in ticks]
+
+        ax.set_xticks(ticks)
+        ax.set_xticklabels(tick_labels)
+        for tick in ax.get_xticklabels():
+            tick.set_rotation(30)
+
+        ax.legend()
+
+    def show_monthly_total_graph(ax, xdata, ydata, ydata_stickers):
+        indices = np.arange(len(xdata))
+
+        ax.bar(indices, ydata, 
+                alpha=1.0, color='dodgerblue', 
+                label='All messages')
+
+        ax.bar(indices, ydata_stickers, 
+                alpha=1.0, color='orange', 
+                label='Facebook stickers')
+
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Count')
+        ax.set_title('Number of messages exchanged every month')
+
+        ax.set_xticks(indices)
         ax.set_xticklabels(xdata)
         for tick in ax.get_xticklabels():
             tick.set_rotation(30)
-        ax.legend()
 
-    # Graph shows daily averages of messages
-    def show_daily_average_graph(ax, xdata, ydata):
+        ax.legend()
+   
+    def show_day_name_average_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
         bar_width = 0.6
         
         ax.bar(indices, ydata, bar_width, 
-                alpha=0.5, color='b',
+                alpha=1.0, color='dodgerblue',
                 align='center',
                 label='All messages')
 
         ax.set_xlabel('Day of the Week')
         ax.set_ylabel('Count')
-        ax.set_title('Daily Averages')
+        ax.set_title('Average number of messages every day of the week')
+
         ax.set_xticks(indices)
         ax.set_xticklabels(xdata)
         ax.legend()
 
-    # Graph shows hourly averages of messages
     def show_hourly_average_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
         bar_width = 0.8
         
         ax.bar(indices, ydata, bar_width, 
-                alpha=0.5, color='b',
+                alpha=1.0, color='dodgerblue',
                 align='center',
                 label='All messages')
 
         ax.set_xlabel('Hour')
         ax.set_ylabel('Count')
-        ax.set_title('Hourly Averages')
+        ax.set_title('Average number of messages every hour of the day')
+
         ax.set_xticks(indices)
         ax.set_xticklabels(xdata)
         for tick in ax.get_xticklabels():
             tick.set_rotation(30)
         ax.legend()
 
-    # Graph shows sentiment over time
     def show_daily_sentiment_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
 
         ax.plot(indices, ydata, 
-                alpha=0.5, color='b', 
-                label='Text messages')
+                alpha=1.0, color='darkseagreen', 
+                label='VADER sentiment')
 
         ax.set_xlabel('Date')
         ax.set_ylabel('Sentiment')
-        ax.set_title('Daily Sentiment')
+        ax.set_title('Average sentiment over time')
 
-        num_ticks = 8
+        num_ticks = 16
         tick_spacing = round(len(indices) / num_ticks)
         ticks = [tick_spacing * i for i in range(num_ticks)]
         tick_labels = [xdata[tick] for tick in ticks]
@@ -206,13 +235,13 @@ def analyze(filename):
         ax.legend()
 
     # Call the graphing methods
-    show_monthly_count_graph(ax_array[0][0], xdata_monthly, ydata_monthly, ydata_monthly_stickers)
-    show_daily_average_graph(ax_array[1][0], xdata_day, ydata_day)
-    show_hourly_average_graph(ax_array[2][0], xdata_hourly, ydata_hourly)
+    show_daily_total_graph(ax_array[0][0], xdata_daily, ydata_daily, ydata_daily_stickers)
     show_daily_sentiment_graph(ax_array[0][1], xdata_sentiment, ydata_sentiment)
+    show_monthly_total_graph(ax_array[1][0], xdata_monthly, ydata_monthly, ydata_monthly_stickers)
+    show_day_name_average_graph(ax_array[1][1], xdata_day_name, ydata_day_name)
+    show_hourly_average_graph(ax_array[1][2], xdata_hourly, ydata_hourly)
 
     # Display the plots
-    fig.tight_layout()
     plt.show()
 
     print('Done.')
