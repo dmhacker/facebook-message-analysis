@@ -97,7 +97,7 @@ def analyze(filename):
     num_days = (last_date - first_date).days
 
     # Get most common words
-    most_used_words = heapq.nlargest(100, word_frequencies.items(), key=itemgetter(1)) 
+    top_words = heapq.nlargest(42, word_frequencies.items(), key=itemgetter(1)) 
 
     print('Processed data in {0:.2f} seconds.'.format(time.clock() - timestamp))
 
@@ -116,6 +116,7 @@ def analyze(filename):
     ydata_hourly = [float(hourly_counts[x]) / num_days for x in range(24)]
     xdata_sentiment = sorted(list(daily_sentiments.keys()))
     ydata_sentiment = [daily_sentiments[x] for x in xdata_sentiment]
+    xdata_top_words, ydata_top_words = zip(*top_words) 
 
     '''
     DATA VISUALIZATION 
@@ -190,7 +191,6 @@ def analyze(filename):
 
         ax.set_xticks(indices)
         ax.set_xticklabels(xdata)
-        ax.legend()
 
     def show_hourly_average_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
@@ -209,7 +209,6 @@ def analyze(filename):
         ax.set_xticklabels(xdata)
         for tick in ax.get_xticklabels():
             tick.set_rotation(30)
-        ax.legend()
 
     def show_daily_sentiment_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
@@ -234,12 +233,29 @@ def analyze(filename):
 
         ax.legend()
 
+    def show_top_words_graph(ax, xdata, ydata):
+        indices = np.arange(len(xdata))
+        bar_width = 0.8
+        
+        ax.barh(indices, ydata, bar_width, 
+                alpha=1.0, color='orchid',
+                align='center',
+                label='All messages')
+
+        ax.set_ylabel('Word')
+        ax.set_xlabel('Uses')
+        ax.set_title('Our {0} most used words'.format(len(xdata)))
+
+        ax.set_yticks(indices)
+        ax.set_yticklabels(xdata)
+
     # Call the graphing methods
     show_daily_total_graph(ax_array[0][0], xdata_daily, ydata_daily, ydata_daily_stickers)
-    show_daily_sentiment_graph(ax_array[0][1], xdata_sentiment, ydata_sentiment)
-    show_monthly_total_graph(ax_array[1][0], xdata_monthly, ydata_monthly, ydata_monthly_stickers)
-    show_day_name_average_graph(ax_array[1][1], xdata_day_name, ydata_day_name)
-    show_hourly_average_graph(ax_array[1][2], xdata_hourly, ydata_hourly)
+    show_monthly_total_graph(ax_array[0][1], xdata_monthly, ydata_monthly, ydata_monthly_stickers)
+    show_daily_sentiment_graph(ax_array[0][2], xdata_sentiment, ydata_sentiment)
+    show_day_name_average_graph(ax_array[1][0], xdata_day_name, ydata_day_name)
+    show_hourly_average_graph(ax_array[1][1], xdata_hourly, ydata_hourly)
+    show_top_words_graph(ax_array[1][2], xdata_top_words[::-1], ydata_top_words[::-1])
 
     # Display the plots
     plt.show()
