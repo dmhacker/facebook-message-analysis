@@ -35,7 +35,7 @@ def get_messages(filename, copy_from_cache=True):
         copied_messages = copy.deepcopy(data['messages'])
 
     # Return a sorted list of messages by time
-    return sorted(copied_messages, key=lambda message : message['timestamp'])
+    return sorted(copied_messages, key=lambda message : message['timestamp_ms'])
 
 def analyze(filename):
     '''
@@ -66,7 +66,7 @@ def analyze(filename):
     # Extract information from the messages 
     for message in messages:
         # Convert message's Unix timestamp to local datetime
-        date = datetime.datetime.fromtimestamp(message['timestamp'])
+        date = datetime.datetime.fromtimestamp(message['timestamp_ms']/100)
         month = date.strftime('%Y-%m')
         day = date.strftime('%Y-%m-%d')
         day_name = date.strftime('%A')
