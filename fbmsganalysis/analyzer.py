@@ -35,7 +35,7 @@ def get_messages(filename, copy_from_cache=True):
         copied_messages = copy.deepcopy(data['messages'])
 
     # Return a sorted list of messages by time
-    return sorted(copied_messages, key=lambda message : message['timestamp'])
+    return sorted(copied_messages, key=lambda message : message['timestamp_ms'])
 
 def analyze(filename):
     '''
@@ -44,12 +44,12 @@ def analyze(filename):
 
     # Load messages
     print('Reading file {0} ...'.format(filename))
-    timestamp = time.clock()
+    timestamp = time.perf_counter()
     messages = get_messages(filename, copy_from_cache=False)
-    print('Loaded {0} messages in {1:.2f} seconds.'.format(len(messages), time.clock() - timestamp))
+    print('Loaded {0} messages in {1:.2f} seconds.'.format(len(messages), time.perf_counter() - timestamp))
 
     print('Aggregating data ...')
-    timestamp = time.clock()
+    timestamp = time.perf_counter()
 
     # Data structures to hold information about the messages 
     daily_counts = defaultdict(int)
@@ -66,7 +66,7 @@ def analyze(filename):
     # Extract information from the messages 
     for message in messages:
         # Convert message's Unix timestamp to local datetime
-        date = datetime.datetime.fromtimestamp(message['timestamp'])
+        date = datetime.datetime.fromtimestamp(message['timestamp_ms']/1000.0)
         month = date.strftime('%Y-%m')
         day = date.strftime('%Y-%m-%d')
         day_name = date.strftime('%A')
@@ -120,7 +120,7 @@ def analyze(filename):
     # Get most common words
     top_words = heapq.nlargest(42, word_frequencies.items(), key=itemgetter(1)) 
 
-    print('Processed data in {0:.2f} seconds.'.format(time.clock() - timestamp))
+    print('Processed data in {0:.2f} seconds.'.format(time.perf_counter() - timestamp))
 
     print('Preparing data for display ...')
 
@@ -283,5 +283,3 @@ def analyze(filename):
     plt.show()
 
     print('Done.')
-
-
