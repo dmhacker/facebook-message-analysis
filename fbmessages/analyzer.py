@@ -13,9 +13,11 @@ import time
 import json
 import copy
 
+
 english_stopwords = set(stopwords.words('english'))
 sentiment_analyzer = SentimentIntensityAnalyzer()
 cache = {}
+
 
 def _load_messages(filename):
     if filename in cache:
@@ -25,7 +27,8 @@ def _load_messages(filename):
             data = json.load(jsonfile)
             cache[filename] = data
             return data
-        
+
+
 def get_messages(filename, copy_from_cache=True):
     data = _load_messages(filename)
 
@@ -37,11 +40,8 @@ def get_messages(filename, copy_from_cache=True):
     # Return a sorted list of messages by time
     return sorted(copied_messages, key=lambda message : message['timestamp_ms'])
 
-def analyze(filename):
-    '''
-    MESSAGE ANALYSIS
-    '''
 
+def analyze(filename):
     # Load messages
     print('Reading file {0} ...'.format(filename))
     timestamp = time.perf_counter()
@@ -99,7 +99,7 @@ def analyze(filename):
                 # Word might have been entirely punctuation; don't strip it
                 if not new_word:
                     new_word = word.lower()
-                
+
                 # Ignore word if it in the stopword set or if it is less than 2 characters
                 if len(new_word) > 1 and new_word not in english_stopwords:
                     word_frequencies[new_word] += 1 
@@ -138,10 +138,6 @@ def analyze(filename):
     xdata_sentiment = sorted(list(daily_sentiments.keys()))
     ydata_sentiment = [daily_sentiments[x] for x in xdata_sentiment]
     xdata_top_words, ydata_top_words = zip(*top_words) 
-
-    '''
-    DATA VISUALIZATION 
-    '''
 
     print('Displaying ...')
 
@@ -196,12 +192,13 @@ def analyze(filename):
             tick.set_rotation(30)
 
         ax.legend()
-   
+
+
     def show_day_name_average_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
         bar_width = 0.6
-        
-        ax.bar(indices, ydata, bar_width, 
+
+        ax.bar(indices, ydata, bar_width,
                 alpha=1.0, color='dodgerblue',
                 align='center',
                 label='All messages')
@@ -216,7 +213,7 @@ def analyze(filename):
     def show_hourly_average_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
         bar_width = 0.8
-        
+
         ax.bar(indices, ydata, bar_width, 
                 alpha=1.0, color='dodgerblue',
                 align='center',
@@ -258,8 +255,8 @@ def analyze(filename):
     def show_top_words_graph(ax, xdata, ydata):
         indices = np.arange(len(xdata))
         bar_width = 0.8
-        
-        ax.barh(indices, ydata, bar_width, 
+
+        ax.barh(indices, ydata, bar_width,
                 alpha=1.0, color='orchid',
                 align='center',
                 label='All messages')

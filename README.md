@@ -8,7 +8,7 @@
 
 ```
 git clone https://github.com/dmhacker/facebook-message-analysis && cd facebook-message-analysis
-python fbmsganalysis FILE
+python fbmessages FILE
 ```
 <sup><sub>* Replace FILE with the path to the JSON file you identified earlier.</sub><sup>
 
