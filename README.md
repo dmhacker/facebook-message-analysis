@@ -1,34 +1,30 @@
 # facebook-message-analysis
 
-1. Download your Facebook messenger history from your Facebook settings. [More here.](https://webapps.stackexchange.com/questions/27640/how-can-i-download-all-messages-from-facebook)
+1. Download your Facebook messenger history from your Facebook settings. 
+[More here.](https://webapps.stackexchange.com/questions/27640/how-can-i-download-all-messages-from-facebook)
 2. Unzip your data into the directory of your choice.
 3. Identify a person whose chat history you want to analyze.
-4. Find the JSON file listing all of their messages with you (it's going to named after their username).
-5. Now, run:
-
+4. Find the JSON file listing all of their messages with you (named after their username).
+    1. We will refer to this file's path as ${FILE}.
+5. Clone this repository and change directory into it.
 ```
 git clone https://github.com/dmhacker/facebook-message-analysis && cd facebook-message-analysis
-python fbmessages FILE
 ```
-<sup><sub>* Replace FILE with the path to the JSON file you identified earlier.</sub><sup>
-
-In a few seconds, you should have some nice & pretty graphs that might reveal some interesting insights and/or trends.
-
-## Troubleshooting
-
-If you get an import error, it means that the dependencies that `facebook-message-analysis` needs are not installed.<br>
-Use this command inside the project directory to resolve this:
-
+6. Install any dependencies.
 ```
 pip install -r requirements.txt
 ```
-
-If you get an NLTK download error, it means that NLTK hasn't cached the stopwords file that `facebook-message-analysis` uses.<br>
-Use this command inside the project directory to resolve this:
-
+7. If you get an NTLK download error, use this command to resolve the issue. 
+It will tell NTLK to download the appropriate stopwords file.
 ```
 python
 >>> import nltk
 >>> nltk.download('stopwords')
 >>> quit()
 ```
+8. Run the analyzer.
+```
+python fbmessages ${FILE}
+```
+
+In a few seconds, the visualizations should appear.
